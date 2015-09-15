@@ -37,8 +37,18 @@ apply Service "<%= @object_servicename %>" <%= @apply %> {
   <%- if @check_command -%>
   check_command = "<%= @check_command -%>"
   <%- end -%>
-  <%- if @vars.any? -%>
-  vars += <%= scope.function_icinga2_config_value([@vars]) %>
+  <%- if @vars.empty? != true  -%>
+  <%- @vars.sort_by {|key, value| key}.each do |key, value| -%>
+  <%- if value.is_a?(Hash) -%>
+  vars.<%= key %> = {
+  <%- value.each_pair do |subkey,subvalue|-%>
+    <%= subkey %> = <%= subvalue %>
+  <%- end -%>
+  }
+  <%- else -%>
+  vars.<%= key %> = <%= value %>
+  <%- end -%>
+  <%- end -%>
   <%- end -%>
   <%- if @max_check_attempts -%>
   max_check_attempts = <%= @max_check_attempts %>
